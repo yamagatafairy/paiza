@@ -19,32 +19,72 @@ else:
 import sys
 sys.stdin = open('code/input/input.txt', encoding='utf-8-sig')
 
+from collections import defaultdict, deque
 h, w = map(int, input().split())
 grid = []
 for i in range(h):
-    row = list(map(int, input().split()))
+    row = list(input().split())
     grid.append(row)
-    # print(tmp)
 
-# dp = [[0 for _ in range(w)]]*h # value 
-dp = grid[:]
-# print(dp)
 # print(grid)
 
-for i, g in enumerate(grid):
-    if i == h - 1:
-        break
-    for j in range(w):
-        if j == 0:
-            tmp = max(g[0], g[1])
-        elif j == w-1:
-            if w == 1:
-                tmp = g[0]
-            else:
-                tmp = max(g[w-1],g[w-2])
-        else:
-            tmp = max(g[j-1], g[j], g[j+1])
-        dp[i+1][j] += tmp
+dirs = defaultdict(set)
+dirs_r = defaultdict(set)
+all = set()
+dq= deque()
 
-# print(dp)
-print(max(dp[h-1]))
+n = int(input())
+for i in range(n):
+    a, b = input().split()
+    # print(a, b)
+    dirs[a].add(b)
+    dirs_r[b].add(a)
+    all.add(a)
+    all.add(b)
+
+cnt = 0
+while dirs_r and cnt < 20:
+    hosyoku_animal = all - set(dirs_r.keys())
+    
+    for a in hosyoku_animal:
+        dq.append(a)
+    
+    tmp = set(dirs_r.keys())
+    #print(dirs_r)
+    for key, _ in list(dirs_r.items()):
+        # print(key)
+        dirs_r[key] -= hosyoku_animal
+        if not dirs_r[key]:
+            del dirs_r[key]
+    all = tmp
+    #print(dirs_r, cnt)
+    cnt += 1
+    #print(dq)
+
+'''
+print(dirs)
+print(dirs_r)
+print(all)
+print(dq[0])
+'''
+move = [(1, 1), (1, 0), (1, -1), (0, 1), (0, -1), (-1, 1), (-1, 0), (-1, -1)]
+while dq:
+    # print('dq', dq)
+    tmp = dq.popleft()
+    del_ani = dirs[tmp]
+    # print('del_ani', del_ani)
+    for i in range(h):
+        for j in range(w):
+            if tmp == grid[i][j]:
+                for ci, cj in move:
+                    ci = i + ci
+                    cj = j + cj
+                    if (0 <= ci < h) and (0 <= cj < w):
+                        if grid[ci][cj] in del_ani:
+                            grid[ci][cj] = '-'
+
+
+
+for g in grid:
+    print(*g)
+    
